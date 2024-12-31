@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>烟花效果</title>
+    <title>烟花抛体运动效果</title>
     <style>
         /* CSS for the fireworks and rays */
         body, html {
@@ -36,9 +36,20 @@
         .ray {
             position: absolute;
             width: 4px;
-            height: 100px; /* 每条射线的长度 */
+            height: 4px;
             background: #fff;
-            transform-origin: bottom center;
+            border-radius: 50%;
+            animation: parabolicMovement 3s linear forwards, fadeOut 3s linear forwards;
+        }
+
+        .trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
             animation: fadeOut 3s linear forwards;
         }
 
@@ -48,7 +59,19 @@
             }
         }
 
+        @keyframes parabolicMovement {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(var(--ray-x, 0), var(--ray-y, 0)); /* 使用变量控制水平和垂直位移 */
+            }
+        }
+
         @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
             to {
                 opacity: 0;
             }
@@ -78,7 +101,7 @@
         }
 
         function explode(firework, x, y) {
-            const numRays = 50; // 射线数量
+            const numRays = 30; // 射线数量
             for (let i = 0; i < numRays; i++) {
                 const ray = document.createElement('div');
                 ray.classList.add('ray');
@@ -89,25 +112,53 @@
                 const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
                 ray.style.background = color;
 
-                // 随机角度
-                const angle = Math.random() * 2 * Math.PI;
-                ray.style.transform = `rotate(${angle}rad)`;
+                // 随机水平和垂直方向的速度
+                const horizontalSpeed = (Math.random() - 0.5) * 1000; // -50 to 50 pixels
+                const verticalSpeed = Math.random() * 500; // 0 to 500 pixels
 
-                // 随机速度
-                const speed = Math.random() * 4 + 1;
-                ray.style.animationDuration = `${speed}s`;
+                // 计算最终位置
+                const finalX = horizontalSpeed * 2; // 3秒动画时间
+                const finalY = verticalSpeed * 2 - 0.5 * 9.8 * 9 * 9; // 抛物线运动（忽略空气阻力）
+
+                // 设置 CSS 变量
+                ray.style.setProperty('--ray-x', `${finalX}px`);
+                ray.style.setProperty('--ray-y', `${finalY}px`);
 
                 document.getElementById('fireworks').appendChild(ray);
 
+                // 创建轨迹
+                const trailInterval = 100; // 每 100ms 创建一个轨迹点
+                const totalDuration = 3000; // 总动画时间 3s
+                const trailCount = Math.floor(totalDuration / trailInterval);
+
+                for (let t = 0; t < trailCount; t++) {
+                    const trail = document.createElement('div');
+                    trail.classList.add('trail');
+                    trail.style.left = `${x}px`;
+                    trail.style.top = `${y}px`;
+                    trail.style.background = color;
+
+                    // // 计算轨迹点的位置
+                    // const currentTime = t * trailInterval;
+                    // const trailX = horizontalSpeed * (currentTime / 100);
+                    // const trailY = verticalSpeed * (currentTime / 100) - 0.5 * 9.8 * (currentTime / 100) ** 2;
+
+                    // trail.style.transform = `translate(${trailX}px, ${trailY}px)`;
+                    // trail.style.animationDelay = `${currentTime}ms`;
+
+                    // document.getElementById('fireworks').appendChild(trail);
+                }
+
                 ray.addEventListener('animationend', () => {
                     ray.remove();
+                    document.querySelectorAll('.trail').forEach(trail => trail.remove());
                 });
             }
 
             firework.remove();
         }
 
-        setInterval(createFirework, 1000);
+        setInterval(createFirework, 2000);
     </script>
 </body>
 </html>
