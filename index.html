@@ -76,21 +76,29 @@
                 opacity: 0;
             }
         }
+
+        #text {
+            color: #fff;
+            position: absolute;
+            left: 50%;
+            font-size: large;
+            top: 1%;
+        }
     </style>
 </head>
 <body>
-    <div id="fireworks"></div>
+    <div id="fireworks"><span id="text">点击屏幕, 放飞烟花</span></div>
     <script>
         // JavaScript for creating fireworks
-        function createFirework() {
+        function createFirework(x) {
             const firework = document.createElement('div');
             firework.classList.add('firework');
-            const x = Math.random() * window.innerWidth;
+            // const x = Math.random() * window.innerWidth;
             firework.style.left = `${x}px`;
             firework.style.top = `${window.innerHeight + 100}px`;
 
             // 随机生成上升高度
-            const targetTop = Math.random() * 200 + 50; // 50 to 250 pixels
+            const targetTop = Math.random() * 300 + 200; // 200 to 500 pixels
             firework.style.setProperty('--target-top', `${targetTop}px`);
 
             document.getElementById('fireworks').appendChild(firework);
@@ -158,7 +166,16 @@
             firework.remove();
         }
 
-        setInterval(createFirework, 2000);
+        setInterval(() => {
+            const x = Math.random() * window.innerWidth;
+            createFirework(x);
+        }, 2000);
+
+        // 点击屏幕创建烟花
+        document.getElementById('fireworks').addEventListener('click', (event) => {
+            const clickX = event.clientX;
+            createFirework(clickX);
+        });
     </script>
 </body>
 </html>
